@@ -16,7 +16,8 @@ class TicketmasterService:
         country_code: str | None = None,
         size: int = 10,
         start_date: str | None = None,
-        end_date: str | None = None
+        end_date: str | None = None,
+        venue_id: str | None = None
     ) -> EventSearchResponse | ErrorResponse :
         params = {
             "apikey": self.api_key,
@@ -35,6 +36,9 @@ class TicketmasterService:
 
         if end_date:
             params["endDateTime"] = end_date
+
+        if venue_id:
+            params["venueId"] = venue_id
 
         try:
             async with httpx.AsyncClient() as client:
