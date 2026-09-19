@@ -2,7 +2,7 @@ import httpx
 
 from configs.server_config import TICKETMASTER_BASE_URL, TICKETMASTER_API_KEY
 from schemas.error import ErrorResponse
-from schemas.event import Event, EventSearchResponse
+from schemas.event import Event, EventDetailsResponse, EventSearchResponse
 
 class TicketmasterService:
     def __init__(self) -> None:
@@ -86,7 +86,7 @@ class TicketmasterService:
                 message="Failed to search event"
             )
 
-    async def get_event_details(self, event_id: str):
+    async def get_event_details(self, event_id: str) -> EventDetailsResponse | ErrorResponse :
         params={
             "apikey": self.api_key
         }
@@ -100,13 +100,39 @@ class TicketmasterService:
 
             response.raise_for_status()
 
-            return response.json()
+            event = response.json()
+            dates = event.get("dates", {}).get("start", {})
+            venues = event.get("_embedded", {}).get("venues", [])
+            venue_name = venues[0].get("name") if venues else None
+            venue_id = venues[0].get("id") if venues else None
+
+            return EventDetailsResponse(
+                id=event.get("id"),
+                name=event.get("name"),
+                url=event.get("url"),
+                date=dates.get("localDate"),
+                time=dates.get("localTime"),
+                timezone=event.get("dates", {}).get("timezone"),
+                venue_name=venue_name,
+                venue_id=venue_id,
+                promoter=event.get("promoter", {}).get("name"),
+                please_note=event.get("pleaseNote"),
+                ticket_limit_info=event.get("ticketLimit", {}).get("info")
+            )
 
         except httpx.HTTPStatusError as e:
-            print(f"API request failed with status code {e.response.status_code}: {e}")
+            return ErrorResponse(
+                success=False,
+                error=str(e),
+                message=f"Failed to fetch event details with status code {e.response.status_code}"
+            )
         
         except Exception as e:
-            return f"Failed to search event: {e}"
+            return ErrorResponse(
+                success=False,
+                error=str(e),
+                message="Failed to fetch event details"
+            )
 
 
     async def search_venues(
