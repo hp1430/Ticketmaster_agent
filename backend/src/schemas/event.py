@@ -1,8 +1,8 @@
+from dataclasses import dataclass
 from typing import Optional
 
-from pydantic import BaseModel
-
-class Event(BaseModel):
+@dataclass
+class Event():
     id: str
     name: str
     date: str | None = None
@@ -11,11 +11,13 @@ class Event(BaseModel):
     city: str | None = None
     url: str | None = None
 
-class EventSearchResponse(BaseModel):
+@dataclass
+class EventSearchResponse():
     events: list[Event]
     total: int
 
-class EventDetailsResponse(BaseModel):
+@dataclass
+class EventDetailsResponse():
     id: str
     name: str
     url: str

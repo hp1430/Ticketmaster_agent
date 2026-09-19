@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from dataclasses import dataclass
 
-
-class ErrorResponse(BaseModel):
-    success: bool = False
+@dataclass
+class ErrorResponse():
     error: str
     message: str
+    success: bool = False
