@@ -63,3 +63,37 @@ class TicketmasterService:
         
         except Exception as e:
             return f"Failed to search event: {e}"
+
+
+    async def search_venues(
+            self,
+            keyword: str,
+            country_code: str | None = None,
+            size: int = 10
+        ):
+            params = {
+                "apikey": self.api_key,
+                "keyword": keyword,
+                "size": size,
+            }
+    
+            if country_code:
+                params["countryCode"] = country_code
+    
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(
+                        f"{TICKETMASTER_BASE_URL}/venues.join",
+                        params=params
+                    )
+    
+                response.raise_for_status()
+    
+                return response.json()
+    
+            except httpx.HTTPStatusError as e:
+                print(f"API request failed with status code {e.response.status_code}: {e}")
+    
+            except Exception as e:
+                return f"Failed to search event: {e}"
+    
