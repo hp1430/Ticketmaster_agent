@@ -1,9 +1,8 @@
-from dataclasses import dataclass
-
 from typing import List, Optional
 
-@dataclass
-class Venue():
+from pydantic import BaseModel
+
+class Venue(BaseModel):
     id: str
     name: str
     city: Optional[str] = None
@@ -13,20 +12,17 @@ class Venue():
     postal_code: Optional[str] = None
     url: Optional[str] = None
 
-@dataclass
-class VenueSearchResponse():
+class VenueSearchResponse(BaseModel):
     venues: List[Venue]
     total: int
 
-@dataclass
-class BoxOfficeDetails():
+class BoxOfficeDetails(BaseModel):
     phone_detail: Optional[str] = None
     open_hours: Optional[str] = None
     accepted_payments: Optional[str] = None
     will_call_detail: Optional[str] = None
 
-@dataclass
-class VenueDetailResponse():
+class VenueDetailResponse(BaseModel):
     id: str
     name: str
     url: Optional[str] = None
