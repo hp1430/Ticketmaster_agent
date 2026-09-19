@@ -11,7 +11,9 @@ class TicketmasterService:
         keyword: str,
         city: str | None = None,
         country_code: str | None = None,
-        size: int = 10
+        size: int = 10,
+        start_date: str | None = None,
+        end_date: str | None = None
     ):
         params = {
             "apikey": self.api_key,
@@ -24,6 +26,12 @@ class TicketmasterService:
 
         if country_code:
             params["countryCode"] = country_code
+
+        if start_date:
+            params["startDateTime"] = start_date
+
+        if end_date:
+            params["endDateTime"] = end_date
 
         try:
             async with httpx.AsyncClient() as client:
