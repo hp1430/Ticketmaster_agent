@@ -3,6 +3,7 @@ import httpx
 from configs.server_config import TICKETMASTER_BASE_URL, TICKETMASTER_API_KEY
 from schemas.error import ErrorResponse
 from schemas.event import Event, EventDetailsResponse, EventSearchResponse
+from schemas.venue import Venue, VenueSearchResponse
 
 class TicketmasterService:
     def __init__(self) -> None:
@@ -140,7 +141,7 @@ class TicketmasterService:
             keyword: str,
             country_code: str | None = None,
             size: int = 10
-        ):
+        ) -> VenueSearchResponse | ErrorResponse:
             params = {
                 "apikey": self.api_key,
                 "keyword": keyword,
@@ -159,13 +160,43 @@ class TicketmasterService:
     
                 response.raise_for_status()
     
-                return response.json()
+                data = response.json()
+                raw_venues = data.get("_embedded", {}).get("venues", [])
+                venues = []
+
+                for raw_venue in raw_venues:
+                    venues.append(
+                        Venue(
+                            id = raw_venue.get("id"),
+                            name=raw_venue.get("name"),
+                            city=raw_venue.get("city", {}).get("name"),
+                            state=raw_venue.get("state", {}).get("name"),
+                            country=raw_venue.get("country", {}).get("name"),
+                            address=raw_venue.get("address", {}).get("line1"),
+                            postal_code=raw_venue.get("postalCode"),
+                            url=raw_venue.get("url")
+                        )
+                    )
+                total = data.get("page", {}).get("totalElements", len(venues))
+
+                return VenueSearchResponse(
+                    venues=venues,
+                    total=total
+                )
     
             except httpx.HTTPStatusError as e:
-                print(f"API request failed with status code {e.response.status_code}: {e}")
+                return ErrorResponse(
+                success=False,
+                error=str(e),
+                message=f"Failed to search venues with status code {e.response.status_code}"
+            )
     
             except Exception as e:
-                return f"Failed to search event: {e}"
+                return ErrorResponse(
+                success=False,
+                error=str(e),
+                message="Failed to search venues"
+            )
 
 
     async def get_venue_details(self, venue_id: str):
