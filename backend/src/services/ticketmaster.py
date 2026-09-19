@@ -1,6 +1,8 @@
 import httpx
 
 from configs.server_config import TICKETMASTER_BASE_URL, TICKETMASTER_API_KEY
+from schemas.error import ErrorResponse
+from schemas.event import Event, EventSearchResponse
 
 class TicketmasterService:
     def __init__(self) -> None:
@@ -14,7 +16,7 @@ class TicketmasterService:
         size: int = 10,
         start_date: str | None = None,
         end_date: str | None = None
-    ):
+    ) -> EventSearchResponse | ErrorResponse :
         params = {
             "apikey": self.api_key,
             "keyword": keyword,
@@ -36,19 +38,53 @@ class TicketmasterService:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(
-                    f"{TICKETMASTER_BASE_URL}/events.join",
+                    f"{TICKETMASTER_BASE_URL}/events.json",
                     params=params
                 )
 
             response.raise_for_status()
 
-            return response.json()
+            data = response.json()
+            raw_events = data.get("_embedded", {}).get("events", [])
+            events = []
+
+            for event in raw_events:
+                dates = event.get("dates", {}).get("start", {})
+                venues = event.get("_embedded", {}).get("venues", [])
+                venue = venues[0] if venues else {}
+
+                events.append(
+                    Event(
+                        id = event.get("id"),
+                        name = event.get("name"),
+                        date = dates.get("localDate"),
+                        time = dates.get("localTime"),
+                        venue = venue.get("name"),
+                        city = venue.get("city", {}).get("name", ""),
+                        url = event.get("url")
+                    )
+                )
+
+            total = data.get("page", {}).get("totalElements", len(events))
+
+            return EventSearchResponse(
+                events=events,
+                total=total
+            )
 
         except httpx.HTTPStatusError as e:
-            print(f"API request failed with status code {e.response.status_code}: {e}")
+            return ErrorResponse(
+                success=False,
+                error=str(e),
+                message="Failed to search event"
+            )
 
         except Exception as e:
-            return f"Failed to search event: {e}"
+            return ErrorResponse(
+                success=False,
+                error=str(e),
+                message="Failed to search event"
+            )
 
     async def get_event_details(self, event_id: str):
         params={
@@ -91,7 +127,7 @@ class TicketmasterService:
             try:
                 async with httpx.AsyncClient() as client:
                     response = await client.get(
-                        f"{TICKETMASTER_BASE_URL}/venues.join",
+                        f"{TICKETMASTER_BASE_URL}/venues.json",
                         params=params
                     )
     
