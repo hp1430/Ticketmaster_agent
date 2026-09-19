@@ -3,7 +3,7 @@ import httpx
 from configs.server_config import TICKETMASTER_BASE_URL, TICKETMASTER_API_KEY
 from schemas.error import ErrorResponse
 from schemas.event import Event, EventDetailsResponse, EventSearchResponse
-from schemas.venue import Venue, VenueSearchResponse
+from schemas.venue import BoxOfficeDetails, Venue, VenueDetailResponse, VenueSearchResponse
 
 class TicketmasterService:
     def __init__(self) -> None:
@@ -199,7 +199,7 @@ class TicketmasterService:
             )
 
 
-    async def get_venue_details(self, venue_id: str):
+    async def get_venue_details(self, venue_id: str) -> VenueDetailResponse | ErrorResponse:
             params={
                 "apikey": self.api_key
             }
@@ -213,10 +213,41 @@ class TicketmasterService:
     
                 response.raise_for_status()
     
-                return response.json()
+                venue = response.json()
+                box_office = venue.get("boxOfficeInfo", {})
+                general_info = venue.get("generalInfo", {})
+
+                return VenueDetailResponse(
+                id=venue.get("id"),
+                name=venue.get("name"),
+                url=venue.get("url"),
+                postal_code=venue.get("postalCode"),
+                timezone=venue.get("timezone"),
+                city=venue.get("city", {}).get("name"),
+                state=venue.get("state", {}).get("name"),
+                country=venue.get("country", {}).get("name"),
+                address=venue.get("address", {}).get("line1"),
+                box_office=BoxOfficeDetails(
+                    phone_detail=box_office.get("phoneNumberDetail"),
+                    open_hours=box_office.get("openHoursDetail"),
+                    accepted_payments=box_office.get("acceptedPaymentDetail"),
+                    will_call_detail=box_office.get("willCallDetail")
+                ),
+                parking_detail=venue.get("parkingDetail"),
+                accessible_seating_detail=venue.get("accessibleSeatingDetail"),
+                general_rule=general_info.get("generalRule")
+            )
     
             except httpx.HTTPStatusError as e:
-                print(f"API request failed with status code {e.response.status_code}: {e}")
+                return ErrorResponse(
+                success=False,
+                error=str(e),
+                message=f"Failed to fetch venue details with status code {e.response.status_code}"
+            )
             
             except Exception as e:
-                return f"Failed to search event: {e}"
+                return ErrorResponse(
+                success=False,
+                error=str(e),
+                message="Failed to fetch venue details"
+            )
