@@ -38,6 +38,28 @@ class TicketmasterService:
 
         except httpx.HTTPStatusError as e:
             print(f"API request failed with status code {e.response.status_code}: {e}")
-            
+
+        except Exception as e:
+            return f"Failed to search event: {e}"
+
+    async def get_event_details(self, event_id: str):
+        params={
+            "apikey": self.api_key
+        }
+
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    f"{TICKETMASTER_BASE_URL}/events/{event_id}.json",
+                    params=params
+                )
+
+            response.raise_for_status()
+
+            return response.json()
+
+        except httpx.HTTPStatusError as e:
+            print(f"API request failed with status code {e.response.status_code}: {e}")
+        
         except Exception as e:
             return f"Failed to search event: {e}"
