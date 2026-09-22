@@ -3,6 +3,7 @@ import uuid
 
 from agent import build_agent
 from memory import thread_config
+from model import select_provider
 from runtime import format_interrupt, resume_turn, start_turn
 from schemas.agent_result import AgentTurnResult
 
@@ -46,7 +47,12 @@ def _drain(agent, result: AgentTurnResult, config: dict) -> AgentTurnResult:
 
 def chat() -> None:
     agent = build_agent()
+    provider = select_provider()
     config = thread_config(str(uuid.uuid4()))
+
+    print(f"Provider: {provider.name} . {provider.model}")
+    print("Type 'exit', 'quit', 'q' to stop.")
+
     while True:
         user_input = input("You: ").strip()
         if user_input.lower() in {"exit", "quit", "q"}:

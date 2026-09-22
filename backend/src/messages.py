@@ -17,6 +17,8 @@ def last_ai_text(messages: list[Any]) -> str:
         if getattr(message, "tool_calls", None):
             continue
         content = message.content
+        if isinstance(content, str):
+            return content
         if isinstance(content, list):
             parts = [
                 block.get("text", "") for block in content if isinstance(block, dict) and block.get("type") == "text"
