@@ -15,13 +15,13 @@ def build_hitl_middleware() -> HumanInTheLoopMiddleware:
                     "reject"
                 ]
             },
-            "search_venues_tool": {
+            "search_venues": {
                 "allowed_decisions": [
                     "approve",
                     "reject"
                 ]
             },
-            "get_venue_details_tool": {
+            "get_venue_details": {
                 "allowed_decisions": [
                     "approve",
                     "reject"

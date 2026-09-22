@@ -55,7 +55,10 @@ async def chat() -> None:
     print("Type 'exit', 'quit', 'q' to stop.")
 
     while True:
-        user_input = input("You: ").strip()
+        try:
+            user_input = input("You: ").strip()
+        except EOFError:
+            break
         if user_input.lower() in {"exit", "quit", "q"}:
             break
 
