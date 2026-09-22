@@ -2,7 +2,7 @@ from langchain.tools import tool
 
 from schemas.tool_schema import EventDetailsInput
 
-from ..client import ticketmaster_client
+from client import ticketmaster_client
 
 @tool("get_event_detail", args_schema=EventDetailsInput)
 async def get_event_details_tool(event_id: str) -> str:

@@ -3,7 +3,7 @@ from typing import Optional
 from langchain.tools import tool
 
 from schemas.tool_schema import SearchEventsInput
-from ..client import ticketmaster_client
+from client import ticketmaster_client
 
 @tool("search_events", args_schema=SearchEventsInput)
 async def search_events_tool(

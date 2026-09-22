@@ -2,7 +2,7 @@ from typing import Optional
 from langchain.tools import tool
 from schemas.tool_schema import SearchVenuesInput
 
-from ..client import ticketmaster_client
+from client import ticketmaster_client
 
 @tool("search_venues", args_schema=SearchVenuesInput)
 async def search_venues_tool(

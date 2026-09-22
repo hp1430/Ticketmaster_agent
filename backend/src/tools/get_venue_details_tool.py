@@ -1,7 +1,7 @@
 from langchain.tools import tool
 from schemas.tool_schema import VenueDetailsInput
 
-from ..client import ticketmaster_client
+from client import ticketmaster_client
 
 @tool("get_venue_details", args_schema=VenueDetailsInput)
 async def get_venue_details_tool(venue_id: str) -> str:
