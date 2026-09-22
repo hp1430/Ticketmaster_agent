@@ -1,4 +1,5 @@
 from typing import Any
+import asyncio
 import uuid
 
 from agent import build_agent
@@ -39,13 +40,13 @@ def _prompt_decision(pending: dict[str, Any]) -> list[dict]:
     print("-----------------------------------\n", flush=True)
     return decisions
 
-def _drain(agent, result: AgentTurnResult, config: dict) -> AgentTurnResult:
+async def _drain(agent, result: AgentTurnResult, config: dict) -> AgentTurnResult:
     while result.pending_interrupt is not None:
         decision = _prompt_decision(result.pending_interrupt)
-        result = resume_turn(agent, decision, config)
+        result = await resume_turn(agent, decision, config)
     return result
 
-def chat() -> None:
+async def chat() -> None:
     agent = build_agent()
     provider = select_provider()
     config = thread_config(str(uuid.uuid4()))
@@ -62,8 +63,8 @@ def chat() -> None:
             continue
 
         try:
-            initial_result = start_turn(agent, user_input, config)
-            result = _drain(agent, initial_result, config)
+            initial_result = await start_turn(agent, user_input, config)
+            result = await _drain(agent, initial_result, config)
         except RuntimeError as e:
             print(f"LLM: {e}\n")
             continue
@@ -81,5 +82,5 @@ def chat() -> None:
         print("\n-----------------------------------\n")
 
 if __name__ == "__main__":
-    chat()
+    asyncio.run(chat())
         

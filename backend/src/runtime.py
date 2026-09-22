@@ -41,8 +41,8 @@ def parse_invoke_result(result: Any) -> AgentTurnResult:
         pending_interrupt=None
     )
 
-def start_turn(agent, user_text: str, config: dict) -> AgentTurnResult:
-    result = agent.invoke(
+async def start_turn(agent, user_text: str, config: dict) -> AgentTurnResult:
+    result = await agent.ainvoke(
         {
             "messages": [
                 {
@@ -56,15 +56,15 @@ def start_turn(agent, user_text: str, config: dict) -> AgentTurnResult:
     )
     return parse_invoke_result(result)
 
-def resume_turn(agent, decisions: list[dict], config: dict) -> AgentTurnResult:
-    result = agent.invoke(
+async def resume_turn(agent, decisions: list[dict], config: dict) -> AgentTurnResult:
+    result = await agent.ainvoke(
         Command(resume={
             "decisions": decisions
         }),
         config=config,
         version="v2"
     )
-    return result
+    return parse_invoke_result(result)
 
 def format_interrupt(pending: dict[str, Any]) -> str:
     requests = pending.get("action_requestes") or []
