@@ -12,6 +12,10 @@ class ApprovalDecision(BaseModel):
     message: str | None = None
 
 class ApprovalRequest(BaseModel):
+    thread_id: str
+    decisions: list[ApprovalDecision]
+
+class ChatResponse(BaseModel):
     status: Literal["completed", "approval_required"]
     thread_id: str
     text: str = ""
