@@ -7,7 +7,7 @@ from memory import make_checkpointer
 from middlewares.build_middlewares import build_middlewares
 from model import build_client_model
 from prompts import build_system_prompt
-from tools import tool_catalog
+from tools import ALL_TOOLS
 
 
 def build_agent(
@@ -22,7 +22,7 @@ def build_agent(
 
     agent_kwargs: dict = {
         "model": model,
-        "tools": tool_catalog(),
+        "tools": ALL_TOOLS,
         "system_prompt": build_system_prompt(extra_guidance=extra_guidance, agent_name=agent_name),
         "middleware": build_middlewares(enable_hitl=use_hitl),
         "checkpointer": checkpointer,
