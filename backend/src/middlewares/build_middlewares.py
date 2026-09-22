@@ -1,6 +1,7 @@
 from langchain.agents.middleware import ModelCallLimitMiddleware
 
 from configs.server_config import MAX_MODEL_CALLS_PER_RUN
+from middlewares.hitl import build_hitl_middleware
 
 
 def build_middlewares(
@@ -14,7 +15,7 @@ def build_middlewares(
         )
     ]
 
-    # if enable_hitl:
-    #     layers.append(build_hitl_middleware())
+    if enable_hitl:
+        layers.append(build_hitl_middleware())
 
     return layers
