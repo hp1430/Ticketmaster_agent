@@ -3,6 +3,7 @@ import string
 from langchain.agents import create_agent
 
 from configs.server_config import AGENT_NAME, hitl_enabled
+from memory import make_checkpointer
 from middlewares.build_middlewares import build_middlewares
 from model import build_client_model
 from prompts import build_system_prompt
@@ -15,6 +16,7 @@ def build_agent(
     extra_guidance: str = "",
 ):
     model, provider = build_client_model()
+    checkpointer = make_checkpointer()
     use_hitl = hitl_enabled() if enable_hitl is None else enable_hitl
     agent_name = AGENT_NAME
 
@@ -23,6 +25,7 @@ def build_agent(
         "tools": ALL_TOOLS,
         "system_prompt": build_system_prompt(extra_guidance=extra_guidance, agent_name=agent_name),
         "middleware": build_middlewares(enable_hitl=use_hitl),
+        "checkpointer": checkpointer,
         "name": "Tickectmaster Agent"
     }
 
