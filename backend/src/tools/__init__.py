@@ -11,12 +11,16 @@ ALL_TOOLS = [
     get_venue_details_tool
 ]
 
-def tool_catalog() -> list[dict[str, str]]:
-    """Name + Description of the tools"""
-    return [
-        {   
+def tool_catalog() -> list[dict]:
+    """Return the tool metadata and JSON schemas used by the system prompt."""
+    catalog = []
+    for tool in ALL_TOOLS:
+        schema = getattr(tool, "args_schema", None)
+        schema_builder = getattr(schema, "model_json_schema", None)
+        parameters = schema_builder() if callable(schema_builder) else schema or {}
+        catalog.append({
             "name": tool.name,
-            "description": tool.description
-        }
-        for tool in ALL_TOOLS
-    ]
+            "description": tool.description,
+            "parameters": parameters,
+        })
+    return catalog

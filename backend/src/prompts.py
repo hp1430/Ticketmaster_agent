@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from configs.server_config import AGENT_NAME, PROMPTS_DIR
-import tools
+from tools import tool_catalog
 
 _env = Environment(
     loader = FileSystemLoader(PROMPTS_DIR),
@@ -25,7 +25,7 @@ def build_system_prompt(
         "system_prompt.jinja",
         agent_name=agent_name,
         extra_guidance=extra_guidance,
-        tools=tools.tool_catalog,
+        tools=tool_catalog(),
         current_datetime_utc=now.strftime("%Y-%m-%dT%H:%M:%SZ"),
         current_date=now.strftime("%Y-%m-%d"),
         current_day=now.strftime("%A"),
