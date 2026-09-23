@@ -10,7 +10,11 @@ const getBackendChatUrl = () => {
   return `${baseUrl.replace(/\/$/, "")}/api/chat`;
 };
 
-export const MessageInputContainer = ({ setMessages }) => {
+export const MessageInputContainer = ({
+  setMessages,
+  threadId,
+  setThreadId,
+}) => {
   const [disabled, setDisabled] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -38,14 +42,19 @@ export const MessageInputContainer = ({ setMessages }) => {
     setMessages((prevMessages) => [...prevMessages, newMessage]);
 
     try {
+      const body = {
+        message: trimmedMessage,
+      };
+      if (threadId) {
+        body.thread_id = threadId;
+      }
+
       const response = await fetch(getBackendChatUrl(), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          message: trimmedMessage,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {
@@ -53,7 +62,7 @@ export const MessageInputContainer = ({ setMessages }) => {
       }
 
       const data = await response.json();
-      console.log("data received:", data)
+      console.log("data received:", data);
       const assistantReply =
         data?.message || data?.text || "I received your message.";
 
@@ -69,6 +78,9 @@ export const MessageInputContainer = ({ setMessages }) => {
           }),
         },
       ]);
+      if (!threadId) {
+        setThreadId(data.thread_id);
+      }
     } catch (error) {
       console.error("Failed to send message:", error);
       setMessages((prevMessages) => [
