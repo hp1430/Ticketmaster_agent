@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { MessageInput } from "./MessageInput";
 
-export const MessageInputContainer = () => {
-  const [message, setMessage] = useState("");
+export const MessageInputContainer = ({ setMessages }) => {
   const [disabled, setDisabled] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -14,6 +14,17 @@ export const MessageInputContainer = () => {
       return;
     }
 
+    const newMessage = {
+      id: Date.now(),
+      type: "user",
+      text: trimmedMessage,
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
+
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
     setMessage("");
   };
 
@@ -25,13 +36,13 @@ export const MessageInputContainer = () => {
   };
 
   return (
-    <MessageInput 
-        disabled={disabled}
-        setDisabled={setDisabled}
-        handleSubmit={handleSubmit}
-        handleKeyDown={handleKeyDown}
-        message={message}
-        setMessage={setMessage}
+    <MessageInput
+      disabled={disabled}
+      setDisabled={setDisabled}
+      handleSubmit={handleSubmit}
+      handleKeyDown={handleKeyDown}
+      message={message}
+      setMessage={setMessage}
     />
-  )
+  );
 };

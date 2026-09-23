@@ -1,13 +1,10 @@
 export const MessageInput = ({
-    disabled,
-    setDisabled,
-    handleSubmit,
-    handleKeyDown,
-    message,
-    setMessage
+  disabled,
+  handleSubmit,
+  handleKeyDown,
+  message,
+  setMessage,
 }) => {
-  
-
   return (
     <form
       onSubmit={handleSubmit}
@@ -33,4 +30,4 @@ export const MessageInput = ({
       </button>
     </form>
   );
-}
+};
