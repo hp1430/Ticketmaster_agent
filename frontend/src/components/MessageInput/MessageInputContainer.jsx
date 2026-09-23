@@ -63,8 +63,15 @@ export const MessageInputContainer = ({
 
       const data = await response.json();
       console.log("data received:", data);
+      const isApprovalRequired = data?.status === "approval_required";
+      const pendingInterrupts =
+        data?.pending_interrupts || data?.pending_interrupt || null;
       const assistantReply =
-        data?.message || data?.text || "I received your message.";
+        data?.message ||
+        data?.text ||
+        (isApprovalRequired
+          ? "Approval is required to continue."
+          : "I received your message.");
 
       setMessages((prevMessages) => [
         ...prevMessages,
@@ -72,6 +79,8 @@ export const MessageInputContainer = ({
           id: Date.now() + 1,
           type: "ai",
           text: assistantReply,
+          status: data?.status,
+          pendingInterrupts,
           timestamp: new Date().toLocaleTimeString([], {
             hour: "2-digit",
             minute: "2-digit",

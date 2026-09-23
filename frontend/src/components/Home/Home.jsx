@@ -5,6 +5,7 @@ import { MessageInputContainer } from "../MessageInput/MessageInputContainer";
 export const Home = () => {
   const [messages, setMessages] = useState([]);
   const [threadId, setThreadId] = useState(null);
+  const [approvingMessageId, setApprovingMessageId] = useState(null);
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50">
@@ -21,8 +22,17 @@ export const Home = () => {
           {messages.map((message) => (
             <MessageContainer
               key={message.id}
+              messageId={message.id}
               type={message.type}
               text={message.text}
+              status={message.status}
+              pendingInterrupts={message.pendingInterrupts}
+              decision={message.decision}
+              approvalDisabled={approvingMessageId !== null}
+              setMessages={setMessages}
+              threadId={threadId}
+              setThreadId={setThreadId}
+              setApprovingMessageId={setApprovingMessageId}
               timestamp={message.timestamp}
               name={message.name}
             />
