@@ -1,11 +1,20 @@
 import { useState } from "react";
 import { MessageInput } from "./MessageInput";
 
+const getBackendChatUrl = () => {
+  const baseUrl =
+    import.meta.env.VITE_BACKEND_ENDPOINT ||
+    import.meta.env.BACKEND_ENDPOINT ||
+    "";
+
+  return `${baseUrl.replace(/\/$/, "")}/api/chat`;
+};
+
 export const MessageInputContainer = ({ setMessages }) => {
   const [disabled, setDisabled] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const trimmedMessage = message.trim();
@@ -13,6 +22,8 @@ export const MessageInputContainer = ({ setMessages }) => {
     if (!trimmedMessage || disabled) {
       return;
     }
+
+    setDisabled(true);
 
     const newMessage = {
       id: Date.now(),
@@ -25,7 +36,57 @@ export const MessageInputContainer = ({ setMessages }) => {
     };
 
     setMessages((prevMessages) => [...prevMessages, newMessage]);
-    setMessage("");
+
+    try {
+      const response = await fetch(getBackendChatUrl(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: trimmedMessage,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("data received:", data)
+      const assistantReply =
+        data?.message || data?.text || "I received your message.";
+
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: Date.now() + 1,
+          type: "ai",
+          text: assistantReply,
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        {
+          id: Date.now() + 2,
+          type: "ai",
+          text: "Sorry, I could not reach the server right now.",
+          timestamp: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        },
+      ]);
+    } finally {
+      setMessage("");
+      setDisabled(false);
+    }
   };
 
   const handleKeyDown = (event) => {
